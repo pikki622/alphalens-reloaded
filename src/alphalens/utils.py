@@ -44,10 +44,7 @@ def rethrow(exception, additional_message):
     """
     e = exception
     m = additional_message
-    if not e.args:
-        e.args = (m,)
-    else:
-        e.args = (e.args[0] + m,) + e.args[1:]
+    e.args = (e.args[0] + m,) + e.args[1:] if e.args else (m, )
     raise e
 
 
@@ -140,7 +137,11 @@ def quantize_factor(
     ):
         raise ValueError("Either quantiles or bins should be provided")
 
-    if zero_aware and not (isinstance(quantiles, int) or isinstance(bins, int)):
+    if (
+        zero_aware
+        and not isinstance(quantiles, int)
+        and not isinstance(bins, int)
+    ):
         msg = "zero_aware should only be True when quantiles or bins is an" " integer"
         raise ValueError(msg)
 
@@ -281,11 +282,9 @@ def compute_forward_returns(
             "tz_convert."
         )
 
-    if factor_dateindex.freq:
-        freq = factor_dateindex.freq
-    else:
-        freq = infer_trading_calendar(factor_dateindex, prices.index)
-
+    freq = factor_dateindex.freq or infer_trading_calendar(
+        factor_dateindex, prices.index
+    )
     factor_dateindex = factor_dateindex.intersection(prices.index)
 
     if len(factor_dateindex) == 0:
@@ -624,7 +623,7 @@ def get_clean_factor(
                 groupby.keys()
             )
             if len(diff) > 0:
-                raise KeyError("Assets {} not in group mapping".format(list(diff)))
+                raise KeyError(f"Assets {list(diff)} not in group mapping")
 
             ss = pd.Series(groupby)
             groupby = pd.Series(
@@ -635,7 +634,7 @@ def get_clean_factor(
         if groupby_labels is not None:
             diff = set(groupby.values) - set(groupby_labels.keys())
             if len(diff) > 0:
-                raise KeyError("groups {} not in passed group names".format(list(diff)))
+                raise KeyError(f"groups {list(diff)} not in passed group names")
 
             sn = pd.Series(groupby_labels)
             groupby = pd.Series(index=groupby.index, data=sn[groupby.values].values)
@@ -646,7 +645,7 @@ def get_clean_factor(
 
     fwdret_amount = float(len(merged_data.index))
 
-    no_raise = False if max_loss == 0 else True
+    no_raise = max_loss != 0
     quantile_data = quantize_factor(
         merged_data, quantiles, bins, binning_by_group, no_raise, zero_aware
     )
@@ -848,7 +847,7 @@ def get_clean_factor_and_forward_returns(
         factor, prices, periods, filter_zscore, cumulative_returns
     )
 
-    factor_data = get_clean_factor(
+    return get_clean_factor(
         factor,
         forward_returns,
         groupby=groupby,
@@ -859,7 +858,6 @@ def get_clean_factor_and_forward_returns(
         max_loss=max_loss,
         zero_aware=zero_aware,
     )
-    return factor_data
 
 
 def rate_of_return(period_ret, base_period):

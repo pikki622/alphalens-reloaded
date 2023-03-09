@@ -155,14 +155,11 @@ def plot_turnover_table(autocorrelation_data, quantile_turnover):
     for period in sorted(quantile_turnover.keys()):
         for quantile, p_data in quantile_turnover[period].items():
             turnover_table.loc[
-                "Quantile {} Mean Turnover ".format(quantile),
-                "{}D".format(period),
+                f"Quantile {quantile} Mean Turnover ", f"{period}D"
             ] = p_data.mean()
     auto_corr = pd.DataFrame()
     for period, p_data in autocorrelation_data.items():
-        auto_corr.loc[
-            "Mean Factor Rank Autocorrelation", "{}D".format(period)
-        ] = p_data.mean()
+        auto_corr.loc["Mean Factor Rank Autocorrelation", f"{period}D"] = p_data.mean()
 
     print("Turnover Analysis")
     utils.print_table(turnover_table.apply(lambda x: x.round(3)))
@@ -215,8 +212,8 @@ def plot_ic_ts(ic, ax=None):
     """
     ic = ic.copy()
 
-    num_plots = len(ic.columns)
     if ax is None:
+        num_plots = len(ic.columns)
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
         ax = np.asarray([ax]).flatten()
 
@@ -226,9 +223,7 @@ def plot_ic_ts(ic, ax=None):
         ic.rolling(window=22).mean().plot(ax=a, color="forestgreen", lw=2, alpha=0.8)
 
         a.set(ylabel="IC", xlabel="")
-        a.set_title(
-            "{} Period Forward Return Information Coefficient (IC)".format(period_num)
-        )
+        a.set_title(f"{period_num} Period Forward Return Information Coefficient (IC)")
         a.axhline(0.0, linestyle="-", color="black", lw=1, alpha=0.8)
         a.legend(["IC", "1 month moving avg"], loc="upper right")
         a.text(
@@ -280,7 +275,7 @@ def plot_ic_hist(ic, ax=None):
 
     for a, (period_num, ic) in zip(ax, ic.items()):
         sns.histplot(ic.replace(np.nan, 0.0), kde=True, ax=a)
-        a.set(title="%s Period IC" % period_num, xlabel="IC")
+        a.set(title=f"{period_num} Period IC", xlabel="IC")
         a.set_xlim([-1, 1])
         a.text(
             0.05,
@@ -346,9 +341,9 @@ def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None):
             ax=a,
         )
         a.set(
-            title="{} Period IC {} Dist. Q-Q".format(period_num, dist_name),
+            title=f"{period_num} Period IC {dist_name} Dist. Q-Q",
             ylabel="Observed Quantile",
-            xlabel="{} Distribution Quantile".format(dist_name),
+            xlabel=f"{dist_name} Distribution Quantile",
         )
 
     return ax
@@ -416,8 +411,6 @@ def plot_quantile_returns_bar(
         if num_group < len(ax):
             ax[-1].set_visible(False)
 
-        return ax
-
     else:
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
@@ -431,7 +424,8 @@ def plot_quantile_returns_bar(
         )
         ax.set(xlabel="", ylabel="Mean Return (bps)", ylim=(ymin, ymax))
 
-        return ax
+
+    return ax
 
 
 def plot_quantile_returns_violin(return_by_q, ylim_percentiles=None, ax=None):
@@ -524,7 +518,7 @@ def plot_mean_quantile_returns_spread_time_series(
 
     if isinstance(mean_returns_spread, pd.DataFrame):
         if ax is None:
-            ax = [None for a in mean_returns_spread.columns]
+            ax = [None for _ in mean_returns_spread.columns]
 
         ymin, ymax = (None, None)
         for (i, a), (name, fr_column) in zip(
@@ -548,10 +542,7 @@ def plot_mean_quantile_returns_spread_time_series(
         return ax
 
     periods = mean_returns_spread.name
-    title = (
-        "Top Minus Bottom Quantile Mean Return "
-        "({} Period Forward Return)".format(periods if periods is not None else "")
-    )
+    title = f'Top Minus Bottom Quantile Mean Return ({periods if periods is not None else ""} Period Forward Return)'
 
     if ax is None:
         f, ax = plt.subplots(figsize=(18, 6))
@@ -639,7 +630,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation, period=1, ax=None)
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     factor_autocorrelation.plot(
-        title="{}D Period Factor Rank Autocorrelation".format(period), ax=ax
+        title=f"{period}D Period Factor Rank Autocorrelation", ax=ax
     )
     ax.set(ylabel="Autocorrelation Coefficient", xlabel="")
     ax.axhline(0.0, linestyle="-", color="black", lw=1)
@@ -683,7 +674,7 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     turnover["top quantile turnover"] = quantile_turnover[max_quantile]
     turnover["bottom quantile turnover"] = quantile_turnover[min_quantile]
     turnover.plot(
-        title="{}D Period Top and Bottom Quantile Turnover".format(period),
+        title=f"{period}D Period Top and Bottom Quantile Turnover",
         ax=ax,
         alpha=0.6,
         lw=0.8,
@@ -743,7 +734,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         )
         a.set(ylabel="", xlabel="")
 
-        a.set_title("Monthly Mean {} Period IC".format(periods_num))
+        a.set_title(f"Monthly Mean {periods_num} Period IC")
 
     if num_plots < len(ax):
         ax[-1].set_visible(False)
@@ -787,11 +778,9 @@ def plot_cumulative_returns(factor_returns, period, freq=None, title=None, ax=No
     factor_returns.plot(ax=ax, lw=3, color="forestgreen", alpha=0.6)
     ax.set(
         ylabel="Cumulative Returns",
-        title=(
-            "Portfolio Cumulative Return ({} Fwd Period)".format(period)
-            if title is None
-            else title
-        ),
+        title=f"Portfolio Cumulative Return ({period} Fwd Period)"
+        if title is None
+        else title,
         xlabel="",
     )
     ax.axhline(1.0, linestyle="-", color="black", lw=1)
@@ -907,7 +896,7 @@ def plot_quantile_average_cumulative_return(
         ):
 
             mean = q_ret.loc[(quantile, "mean")]
-            mean.name = "Quantile " + str(quantile)
+            mean.name = f"Quantile {str(quantile)}"
             mean.plot(ax=ax[i], color=palette[i])
             ax[i].set_ylabel("Mean Return (bps)")
 
@@ -936,7 +925,7 @@ def plot_quantile_average_cumulative_return(
         ):
 
             mean = q_ret.loc[(quantile, "mean")]
-            mean.name = "Quantile " + str(quantile)
+            mean.name = f"Quantile {str(quantile)}"
             mean.plot(ax=ax, color=palette[i])
 
             if std_bar:

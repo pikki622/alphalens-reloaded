@@ -282,7 +282,7 @@ def create_returns_tear_sheet(
             mean_quant_ret_bydate["1D"], period="1D", ax=gf.next_row()
         )
 
-    ax_mean_quantile_returns_spread_ts = [gf.next_row() for x in range(fr_cols)]
+    ax_mean_quantile_returns_spread_ts = [gf.next_row() for _ in range(fr_cols)]
     plotting.plot_mean_quantile_returns_spread_time_series(
         mean_ret_spread_quant,
         std_err=std_spread_quant,
@@ -373,7 +373,7 @@ def create_information_tear_sheet(factor_data, group_neutral=False, by_group=Fal
             by_group=False,
             by_time="M",
         )
-        ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
+        ax_monthly_ic_heatmap = [gf.next_cell() for _ in range(fr_cols)]
         plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
     if by_group:

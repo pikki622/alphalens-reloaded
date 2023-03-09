@@ -71,10 +71,7 @@ def factor_information_coefficient(factor_data, group_adjust=False, by_group=Fal
         grouper.append("group")
 
     ic = factor_data.groupby(grouper).apply(src_ic)
-    if by_group:
-        return ic
-    else:
-        return ic.asfreq(freq)
+    return ic if by_group else ic.asfreq(freq)
 
 
 def mean_information_coefficient(
@@ -119,12 +116,11 @@ def mean_information_coefficient(
     if by_group:
         grouper.append("group")
 
-    if len(grouper) == 0:
-        ic = ic.mean()
-
-    else:
-        ic = ic.reset_index().set_index("date").groupby(grouper).mean()
-
+    ic = (
+        ic.reset_index().set_index("date").groupby(grouper).mean()
+        if grouper
+        else ic.mean()
+    )
     return ic
 
 
@@ -252,14 +248,13 @@ def factor_returns(
     s = utils.get_forward_returns_columns(factor_data.columns)
     weighted_returns = factor_data[s].multiply(weights, axis=0)
 
-    if by_asset:
-        returns = weighted_returns
-    else:
-        # requires at least one weighted return
-        # otherwise returns np.nan
-        returns = weighted_returns.groupby(level="date").sum(min_count=1).asfreq(freq)
-
-    return returns
+    return (
+        weighted_returns
+        if by_asset
+        else weighted_returns.groupby(level="date")
+        .sum(min_count=1)
+        .asfreq(freq)
+    )
 
 
 def factor_alpha_beta(
@@ -950,7 +945,7 @@ def factor_cumulative_returns(
     fwd_ret_cols = utils.get_forward_returns_columns(factor_data.columns)
 
     if period not in fwd_ret_cols:
-        raise ValueError("Period '%s' not found" % period)
+        raise ValueError(f"Period '{period}' not found")
 
     todrop = list(fwd_ret_cols)
     todrop.remove(period)
@@ -1024,7 +1019,7 @@ def factor_positions(
     fwd_ret_cols = utils.get_forward_returns_columns(factor_data.columns)
 
     if period not in fwd_ret_cols:
-        raise ValueError("Period '%s' not found" % period)
+        raise ValueError(f"Period '{period}' not found")
 
     todrop = list(fwd_ret_cols)
     todrop.remove(period)

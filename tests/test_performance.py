@@ -1542,7 +1542,7 @@ class PerformanceTestCase(TestCase):
             factor,
             returns,
             quantiles=quantiles,
-            periods=range(0, after + 1),
+            periods=range(after + 1),
             filter_zscore=False,
         )
 
@@ -1551,8 +1551,7 @@ class PerformanceTestCase(TestCase):
         )
         arrays = []
         for q in range(1, quantiles + 1):
-            arrays.append((q, "mean"))
-            arrays.append((q, "std"))
+            arrays.extend(((q, "mean"), (q, "std")))
         index = MultiIndex.from_tuples(arrays, names=["factor_quantile", None])
         expected = DataFrame(
             index=index, columns=range(-before, after + 1), data=expected_vals
@@ -1651,7 +1650,7 @@ class PerformanceTestCase(TestCase):
             factor,
             prices,
             quantiles=quantiles,
-            periods=range(0, after + 1),
+            periods=range(after + 1),
             filter_zscore=False,
         )
 
@@ -1660,8 +1659,7 @@ class PerformanceTestCase(TestCase):
         )
         arrays = []
         for q in range(1, quantiles + 1):
-            arrays.append((q, "mean"))
-            arrays.append((q, "std"))
+            arrays.extend(((q, "mean"), (q, "std")))
         index = MultiIndex.from_tuples(arrays, names=["factor_quantile", None])
         expected = DataFrame(
             index=index, columns=range(-before, after + 1), data=expected_vals
